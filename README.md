@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./public/sunsign-logo.svg" width="120" alt="SunSign Logo" />
+  <img src=".sunsign/public/sunsign-logo.svg" width="120" alt="SunSign Logo" />
   <h1>SunSign ☀️</h1>
   <p><i>"Light that speaks with every hand"</i></p>
 </div>
