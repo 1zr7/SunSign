@@ -1,0 +1,130 @@
+{
+  "0": {
+    "name": "ain",
+    "arabic": "ع"
+  },
+  "1": {
+    "name": "al",
+    "arabic": "ال"
+  },
+  "2": {
+    "name": "aleff",
+    "arabic": "أ"
+  },
+  "3": {
+    "name": "bb",
+    "arabic": "ب"
+  },
+  "4": {
+    "name": "dal",
+    "arabic": "د"
+  },
+  "5": {
+    "name": "dha",
+    "arabic": "ظ"
+  },
+  "6": {
+    "name": "dhad",
+    "arabic": "ض"
+  },
+  "7": {
+    "name": "fa",
+    "arabic": "ف"
+  },
+  "8": {
+    "name": "gaaf",
+    "arabic": "ق"
+  },
+  "9": {
+    "name": "ghain",
+    "arabic": "غ"
+  },
+  "10": {
+    "name": "ha",
+    "arabic": "ه"
+  },
+  "11": {
+    "name": "haa",
+    "arabic": "ح"
+  },
+  "12": {
+    "name": "jeem",
+    "arabic": "ج"
+  },
+  "13": {
+    "name": "kaaf",
+    "arabic": "ك"
+  },
+  "14": {
+    "name": "khaa",
+    "arabic": "خ"
+  },
+  "15": {
+    "name": "la",
+    "arabic": "لا"
+  },
+  "16": {
+    "name": "laam",
+    "arabic": "ل"
+  },
+  "17": {
+    "name": "meem",
+    "arabic": "م"
+  },
+  "18": {
+    "name": "nun",
+    "arabic": "ن"
+  },
+  "19": {
+    "name": "ra",
+    "arabic": "ر"
+  },
+  "20": {
+    "name": "saad",
+    "arabic": "ص"
+  },
+  "21": {
+    "name": "seen",
+    "arabic": "س"
+  },
+  "22": {
+    "name": "sheen",
+    "arabic": "ش"
+  },
+  "23": {
+    "name": "ta",
+    "arabic": "ط"
+  },
+  "24": {
+    "name": "taa",
+    "arabic": "ت"
+  },
+  "25": {
+    "name": "thaa",
+    "arabic": "ث"
+  },
+  "26": {
+    "name": "thal",
+    "arabic": "ذ"
+  },
+  "27": {
+    "name": "toot",
+    "arabic": "ة"
+  },
+  "28": {
+    "name": "waw",
+    "arabic": "و"
+  },
+  "29": {
+    "name": "ya",
+    "arabic": "ي"
+  },
+  "30": {
+    "name": "yaa",
+    "arabic": "ى"
+  },
+  "31": {
+    "name": "zay",
+    "arabic": "ز"
+  }
+}

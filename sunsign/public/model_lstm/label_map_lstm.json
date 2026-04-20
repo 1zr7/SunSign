@@ -1,0 +1,878 @@
+{
+  "0": {
+    "name": "ALif with maad",
+    "arabic": "آ"
+  },
+  "1": {
+    "name": "Aids",
+    "arabic": "مرض فقدان المناعة / الإيدز"
+  },
+  "2": {
+    "name": "Al",
+    "arabic": "ال"
+  },
+  "3": {
+    "name": "Alhamdulillah",
+    "arabic": "الحمد لله"
+  },
+  "4": {
+    "name": "Alif maqsoura",
+    "arabic": "ى"
+  },
+  "5": {
+    "name": "Alif maqsoura with hamza",
+    "arabic": "ئ"
+  },
+  "6": {
+    "name": "Appendix",
+    "arabic": "الزائدة الدودية"
+  },
+  "7": {
+    "name": "Ayn",
+    "arabic": "ع"
+  },
+  "8": {
+    "name": "Backbone",
+    "arabic": "عمود فقري"
+  },
+  "9": {
+    "name": "Cerebral paralysis",
+    "arabic": "شلل دماغي"
+  },
+  "10": {
+    "name": "Chest",
+    "arabic": "قفص صدري"
+  },
+  "11": {
+    "name": "Daad",
+    "arabic": "ض"
+  },
+  "12": {
+    "name": "Face",
+    "arabic": "وجه"
+  },
+  "13": {
+    "name": "Good bye",
+    "arabic": "مع السلامة"
+  },
+  "14": {
+    "name": "Good evening",
+    "arabic": "مساء الخير"
+  },
+  "15": {
+    "name": "Good morning",
+    "arabic": "صباح الخير"
+  },
+  "16": {
+    "name": "Haa",
+    "arabic": "ح"
+  },
+  "17": {
+    "name": "Heart failure",
+    "arabic": "سكتة قلبية"
+  },
+  "18": {
+    "name": "How are you",
+    "arabic": "كيف حالك"
+  },
+  "19": {
+    "name": "I am fine",
+    "arabic": "أنا بخير"
+  },
+  "20": {
+    "name": "I am pleased to meet you",
+    "arabic": "يسعدني لقاءك"
+  },
+  "21": {
+    "name": "I am sorry",
+    "arabic": "أنا آسف"
+  },
+  "22": {
+    "name": "Ins and Outs",
+    "arabic": "شهيق - زفير"
+  },
+  "23": {
+    "name": "Jiim",
+    "arabic": "ج"
+  },
+  "24": {
+    "name": "Large intestine",
+    "arabic": "الأمعاء الغليظة"
+  },
+  "25": {
+    "name": "Loss of hair",
+    "arabic": "تساقط الشعر"
+  },
+  "26": {
+    "name": "Not bad",
+    "arabic": "ليس سيئاً"
+  },
+  "27": {
+    "name": "Respiratory device",
+    "arabic": "جهاز تنفسي"
+  },
+  "28": {
+    "name": "Saad",
+    "arabic": "ص"
+  },
+  "29": {
+    "name": "Salam aleikum",
+    "arabic": "السلام عليكم"
+  },
+  "30": {
+    "name": "Skeleton",
+    "arabic": "هيكل عظمي"
+  },
+  "31": {
+    "name": "Small intestine",
+    "arabic": "الأمعاء الدقيقة"
+  },
+  "32": {
+    "name": "Sorry",
+    "arabic": "آسف"
+  },
+  "33": {
+    "name": "Taa",
+    "arabic": "ط"
+  },
+  "34": {
+    "name": "Thanks",
+    "arabic": "شكراً"
+  },
+  "35": {
+    "name": "Trachea",
+    "arabic": "قصبة هوائية"
+  },
+  "36": {
+    "name": "Waaw with hamza",
+    "arabic": "ؤ"
+  },
+  "37": {
+    "name": "Zaa",
+    "arabic": "ظ"
+  },
+  "38": {
+    "name": "acupuncture",
+    "arabic": "أخذ إبرة"
+  },
+  "39": {
+    "name": "addiction",
+    "arabic": "إدمان"
+  },
+  "40": {
+    "name": "adhesive tape",
+    "arabic": "شريط لاصق / بلاستر"
+  },
+  "41": {
+    "name": "alif",
+    "arabic": "ا"
+  },
+  "42": {
+    "name": "alif with hamza above",
+    "arabic": "أ"
+  },
+  "43": {
+    "name": "alif with hamza below",
+    "arabic": "إ"
+  },
+  "44": {
+    "name": "allergy",
+    "arabic": "حساسية"
+  },
+  "45": {
+    "name": "analysis",
+    "arabic": "تحليل طبي"
+  },
+  "46": {
+    "name": "analysis laboratory",
+    "arabic": "معمل التحاليل / مختبر"
+  },
+  "47": {
+    "name": "anesthetist",
+    "arabic": "مخدر/ بنج"
+  },
+  "48": {
+    "name": "baa",
+    "arabic": "ب"
+  },
+  "49": {
+    "name": "baby",
+    "arabic": "طفل"
+  },
+  "50": {
+    "name": "bacterium",
+    "arabic": "بكتريا"
+  },
+  "51": {
+    "name": "bathe",
+    "arabic": "يستحم"
+  },
+  "52": {
+    "name": "blood analysis",
+    "arabic": "تحليل دم"
+  },
+  "53": {
+    "name": "blood pressure",
+    "arabic": "ضغط الدم"
+  },
+  "54": {
+    "name": "break",
+    "arabic": "يكسر"
+  },
+  "55": {
+    "name": "build",
+    "arabic": "يبني"
+  },
+  "56": {
+    "name": "burning",
+    "arabic": "حروق"
+  },
+  "57": {
+    "name": "call",
+    "arabic": "ينادي"
+  },
+  "58": {
+    "name": "cancer",
+    "arabic": "سرطان"
+  },
+  "59": {
+    "name": "capsule",
+    "arabic": "كبسولة"
+  },
+  "60": {
+    "name": "choose",
+    "arabic": "يختار"
+  },
+  "61": {
+    "name": "close",
+    "arabic": "يقفل ( يغلق )"
+  },
+  "62": {
+    "name": "cold",
+    "arabic": "زكام"
+  },
+  "63": {
+    "name": "colic",
+    "arabic": "مغص"
+  },
+  "64": {
+    "name": "constipation",
+    "arabic": "إمساك"
+  },
+  "65": {
+    "name": "daal",
+    "arabic": "د"
+  },
+  "66": {
+    "name": "descend",
+    "arabic": "ينزل"
+  },
+  "67": {
+    "name": "diabetes",
+    "arabic": "مرض السكر / سكري"
+  },
+  "68": {
+    "name": "diarrhea",
+    "arabic": "إسهال"
+  },
+  "69": {
+    "name": "digestive system",
+    "arabic": "جهاز هضمي"
+  },
+  "70": {
+    "name": "drink",
+    "arabic": "يشرب"
+  },
+  "71": {
+    "name": "dropper",
+    "arabic": "قطارة"
+  },
+  "72": {
+    "name": "drug's",
+    "arabic": "مخدرات"
+  },
+  "73": {
+    "name": "dye",
+    "arabic": "يصبغ"
+  },
+  "74": {
+    "name": "eat",
+    "arabic": "يأكل"
+  },
+  "75": {
+    "name": "epidemic",
+    "arabic": "وباء"
+  },
+  "76": {
+    "name": "faa",
+    "arabic": "ف"
+  },
+  "77": {
+    "name": "father",
+    "arabic": "أب"
+  },
+  "78": {
+    "name": "fever",
+    "arabic": "حمى"
+  },
+  "79": {
+    "name": "finish",
+    "arabic": "ينهي"
+  },
+  "80": {
+    "name": "first aid",
+    "arabic": "إسعافات أولية"
+  },
+  "81": {
+    "name": "five senses",
+    "arabic": "حواس خمس"
+  },
+  "82": {
+    "name": "gauze",
+    "arabic": "شاش / ضمادة"
+  },
+  "83": {
+    "name": "ghayn",
+    "arabic": "غ"
+  },
+  "84": {
+    "name": "good",
+    "arabic": "جيد"
+  },
+  "85": {
+    "name": "grill",
+    "arabic": "يشوي"
+  },
+  "86": {
+    "name": "grow",
+    "arabic": "يتنامى"
+  },
+  "87": {
+    "name": "haa",
+    "arabic": "ه"
+  },
+  "88": {
+    "name": "hamza",
+    "arabic": "ء"
+  },
+  "89": {
+    "name": "hamza on line",
+    "arabic": "ئـ"
+  },
+  "90": {
+    "name": "happy",
+    "arabic": "سعيد"
+  },
+  "91": {
+    "name": "harvest",
+    "arabic": "يحصد"
+  },
+  "92": {
+    "name": "hate",
+    "arabic": "يكره"
+  },
+  "93": {
+    "name": "headache",
+    "arabic": "صداع"
+  },
+  "94": {
+    "name": "healthy",
+    "arabic": "معافى"
+  },
+  "95": {
+    "name": "hear",
+    "arabic": "يسمع"
+  },
+  "96": {
+    "name": "hearing hindrance",
+    "arabic": "إعاقة سمعية"
+  },
+  "97": {
+    "name": "heart",
+    "arabic": "قلب"
+  },
+  "98": {
+    "name": "heart attack",
+    "arabic": "أزمة قلبية"
+  },
+  "99": {
+    "name": "help",
+    "arabic": "يساعد"
+  },
+  "100": {
+    "name": "hemiplegia",
+    "arabic": "شلل نصفي"
+  },
+  "101": {
+    "name": "hindrance",
+    "arabic": "إعاقة"
+  },
+  "102": {
+    "name": "hospital",
+    "arabic": "مستشفى"
+  },
+  "103": {
+    "name": "house",
+    "arabic": "منزل"
+  },
+  "104": {
+    "name": "immunity",
+    "arabic": "مناعة"
+  },
+  "105": {
+    "name": "important",
+    "arabic": "مهم"
+  },
+  "106": {
+    "name": "infection",
+    "arabic": "عدوى"
+  },
+  "107": {
+    "name": "inflammation",
+    "arabic": "التهاب"
+  },
+  "108": {
+    "name": "inhale",
+    "arabic": "يشم"
+  },
+  "109": {
+    "name": "inoculation",
+    "arabic": "تطعيم"
+  },
+  "110": {
+    "name": "irrigate",
+    "arabic": "يسقي"
+  },
+  "111": {
+    "name": "itch",
+    "arabic": "حكة / هرش"
+  },
+  "112": {
+    "name": "kaaf",
+    "arabic": "ك"
+  },
+  "113": {
+    "name": "kha",
+    "arabic": "خ"
+  },
+  "114": {
+    "name": "laam",
+    "arabic": "ل"
+  },
+  "115": {
+    "name": "laam Alif",
+    "arabic": "لا"
+  },
+  "116": {
+    "name": "laser ray",
+    "arabic": "أشعة ليزر"
+  },
+  "117": {
+    "name": "liquid medicine",
+    "arabic": "دواء شراب"
+  },
+  "118": {
+    "name": "liver",
+    "arabic": "كبد"
+  },
+  "119": {
+    "name": "love",
+    "arabic": "حب"
+  },
+  "120": {
+    "name": "lungs",
+    "arabic": "رئتان"
+  },
+  "121": {
+    "name": "mall",
+    "arabic": "مول"
+  },
+  "122": {
+    "name": "me",
+    "arabic": "أنا"
+  },
+  "123": {
+    "name": "medicine",
+    "arabic": "دواء"
+  },
+  "124": {
+    "name": "mentality hindrance",
+    "arabic": "إعاقة ذهنية"
+  },
+  "125": {
+    "name": "microbe",
+    "arabic": "جرثومة"
+  },
+  "126": {
+    "name": "miim",
+    "arabic": "م"
+  },
+  "127": {
+    "name": "mongoloid",
+    "arabic": "منغولي"
+  },
+  "128": {
+    "name": "monthly circulation",
+    "arabic": "دورة شهرية"
+  },
+  "129": {
+    "name": "mosque",
+    "arabic": "مسجد"
+  },
+  "130": {
+    "name": "mother",
+    "arabic": "أم"
+  },
+  "131": {
+    "name": "muscle",
+    "arabic": "عضلة"
+  },
+  "132": {
+    "name": "nerve",
+    "arabic": "عصب"
+  },
+  "133": {
+    "name": "nervous system",
+    "arabic": "جهاز عصبي"
+  },
+  "134": {
+    "name": "noon",
+    "arabic": "ن"
+  },
+  "135": {
+    "name": "normal",
+    "arabic": "عادي"
+  },
+  "136": {
+    "name": "number_0",
+    "arabic": ""
+  },
+  "137": {
+    "name": "number_1",
+    "arabic": ""
+  },
+  "138": {
+    "name": "number_10",
+    "arabic": ""
+  },
+  "139": {
+    "name": "number_100",
+    "arabic": ""
+  },
+  "140": {
+    "name": "number_1000",
+    "arabic": ""
+  },
+  "141": {
+    "name": "number_1000000",
+    "arabic": ""
+  },
+  "142": {
+    "name": "number_10000000",
+    "arabic": ""
+  },
+  "143": {
+    "name": "number_2",
+    "arabic": ""
+  },
+  "144": {
+    "name": "number_20",
+    "arabic": ""
+  },
+  "145": {
+    "name": "number_200",
+    "arabic": ""
+  },
+  "146": {
+    "name": "number_3",
+    "arabic": ""
+  },
+  "147": {
+    "name": "number_30",
+    "arabic": ""
+  },
+  "148": {
+    "name": "number_300",
+    "arabic": ""
+  },
+  "149": {
+    "name": "number_4",
+    "arabic": ""
+  },
+  "150": {
+    "name": "number_40",
+    "arabic": ""
+  },
+  "151": {
+    "name": "number_400",
+    "arabic": ""
+  },
+  "152": {
+    "name": "number_5",
+    "arabic": ""
+  },
+  "153": {
+    "name": "number_50",
+    "arabic": ""
+  },
+  "154": {
+    "name": "number_500",
+    "arabic": ""
+  },
+  "155": {
+    "name": "number_6",
+    "arabic": ""
+  },
+  "156": {
+    "name": "number_60",
+    "arabic": ""
+  },
+  "157": {
+    "name": "number_600",
+    "arabic": ""
+  },
+  "158": {
+    "name": "number_7",
+    "arabic": ""
+  },
+  "159": {
+    "name": "number_70",
+    "arabic": ""
+  },
+  "160": {
+    "name": "number_700",
+    "arabic": ""
+  },
+  "161": {
+    "name": "number_8",
+    "arabic": ""
+  },
+  "162": {
+    "name": "number_80",
+    "arabic": ""
+  },
+  "163": {
+    "name": "number_800",
+    "arabic": ""
+  },
+  "164": {
+    "name": "number_9",
+    "arabic": ""
+  },
+  "165": {
+    "name": "number_90",
+    "arabic": ""
+  },
+  "166": {
+    "name": "number_900",
+    "arabic": ""
+  },
+  "167": {
+    "name": "ointment",
+    "arabic": "مرهم"
+  },
+  "168": {
+    "name": "oneness",
+    "arabic": "توحد / أوتيزم"
+  },
+  "169": {
+    "name": "open",
+    "arabic": "يفتح"
+  },
+  "170": {
+    "name": "pain",
+    "arabic": "ألم"
+  },
+  "171": {
+    "name": "pancreas",
+    "arabic": "البنكرياس"
+  },
+  "172": {
+    "name": "pharmacy",
+    "arabic": "صيدلية"
+  },
+  "173": {
+    "name": "pharynx",
+    "arabic": "بلعوم"
+  },
+  "174": {
+    "name": "physical disability",
+    "arabic": "اعاقة جسدية"
+  },
+  "175": {
+    "name": "physical examination",
+    "arabic": "فحص سريري"
+  },
+  "176": {
+    "name": "plant",
+    "arabic": "يزرع"
+  },
+  "177": {
+    "name": "plow",
+    "arabic": "يحرث"
+  },
+  "178": {
+    "name": "pollination",
+    "arabic": "تلقيح"
+  },
+  "179": {
+    "name": "pulse",
+    "arabic": "نبض القلب"
+  },
+  "180": {
+    "name": "qaaf",
+    "arabic": "ق"
+  },
+  "181": {
+    "name": "raa",
+    "arabic": "ر"
+  },
+  "182": {
+    "name": "ray photo",
+    "arabic": "صورة اشعة"
+  },
+  "183": {
+    "name": "rise",
+    "arabic": "يصعد"
+  },
+  "184": {
+    "name": "sad",
+    "arabic": "حزين"
+  },
+  "185": {
+    "name": "shiin",
+    "arabic": "ش"
+  },
+  "186": {
+    "name": "sick",
+    "arabic": "مريض / مرض"
+  },
+  "187": {
+    "name": "sight examination",
+    "arabic": "فحص النظر"
+  },
+  "188": {
+    "name": "siin",
+    "arabic": "س"
+  },
+  "189": {
+    "name": "silence",
+    "arabic": "يسكت"
+  },
+  "190": {
+    "name": "skull",
+    "arabic": "جمجة"
+  },
+  "191": {
+    "name": "sleep",
+    "arabic": "ينام"
+  },
+  "192": {
+    "name": "smoke",
+    "arabic": "يدخن"
+  },
+  "193": {
+    "name": "sphygmometroscope",
+    "arabic": "جهاز قياس الضغط"
+  },
+  "194": {
+    "name": "spread",
+    "arabic": "إنتشار"
+  },
+  "195": {
+    "name": "stand",
+    "arabic": "يقف"
+  },
+  "196": {
+    "name": "stethoscope",
+    "arabic": "سماعة أذن"
+  },
+  "197": {
+    "name": "stop",
+    "arabic": "قف"
+  },
+  "198": {
+    "name": "support",
+    "arabic": "يدعم"
+  },
+  "199": {
+    "name": "surgery",
+    "arabic": "عملية جراحية"
+  },
+  "200": {
+    "name": "swelling",
+    "arabic": "تورم"
+  },
+  "201": {
+    "name": "ta",
+    "arabic": "ت"
+  },
+  "202": {
+    "name": "taa marbuuTa",
+    "arabic": "ة"
+  },
+  "203": {
+    "name": "tha",
+    "arabic": "ث"
+  },
+  "204": {
+    "name": "thal",
+    "arabic": "ذ"
+  },
+  "205": {
+    "name": "thanks",
+    "arabic": "شكراً"
+  },
+  "206": {
+    "name": "thermometer",
+    "arabic": "ميزان حرارة"
+  },
+  "207": {
+    "name": "think",
+    "arabic": "يفكر"
+  },
+  "208": {
+    "name": "thinking",
+    "arabic": "يفكر"
+  },
+  "209": {
+    "name": "tissue",
+    "arabic": "أنسجة"
+  },
+  "210": {
+    "name": "virus",
+    "arabic": "فيروس"
+  },
+  "211": {
+    "name": "visual impairment",
+    "arabic": "اعاقة بصرية"
+  },
+  "212": {
+    "name": "waaw",
+    "arabic": "و"
+  },
+  "213": {
+    "name": "wake up",
+    "arabic": "يستيقظ"
+  },
+  "214": {
+    "name": "walk",
+    "arabic": "يمشي"
+  },
+  "215": {
+    "name": "worry",
+    "arabic": "يقلق"
+  },
+  "216": {
+    "name": "wound",
+    "arabic": "جرح نازف"
+  },
+  "217": {
+    "name": "yaa",
+    "arabic": "ي"
+  },
+  "218": {
+    "name": "zay",
+    "arabic": "ز"
+  }
+}

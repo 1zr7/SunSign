@@ -1,0 +1,52 @@
+@keyframes rotate-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(255, 238, 2, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(255, 238, 2, 0.9), 0 0 80px rgba(255, 238, 2, 0.3);
+  }
+}
+
+@keyframes ray-burst {
+  0% {
+    transform: scale(0.9);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-right {
+  0% {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes draw-skeleton {
+  from { stroke-dashoffset: 100; }
+  to { stroke-dashoffset: 0; }
+}
+
+.animate-rotate-slow {
+  animation: rotate-slow 60s linear infinite;
+}
+
+.animate-ray-burst {
+  animation: ray-burst 0.6s ease-out forwards;
+}
+
+.active-detect-pulse {
+  animation: pulse-glow 2s ease-in-out infinite;
+}

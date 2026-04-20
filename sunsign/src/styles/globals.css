@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=JetBrains+Mono:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body, #root {
+    @apply h-full w-full overflow-hidden m-0 p-0;
+    background-color: var(--sun-void);
+    color: var(--text-primary);
+    cursor: none; /* Hide default cursor */
+    font-family: var(--font-ui);
+  }
+
+  /* SVG Noise Overlay Filter */
+  body::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 9998; /* Just below cursor */
+    opacity: 0.04;
+    background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIj48ZmlsdGVyIGlkPSJmIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC42IiBudW1PY3RhdmVzPSIzIiBzdGl0Y2hUaWxlcz0ic3RpdGNoIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSI0MDAiIGZpbHRlcj0idXJsKCNmKSIvPjwvc3ZnPg==);
+  }
+
+  /* Typography setups */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-brand);
+  }
+
+  /* Arabic specific styling */
+  [dir="rtl"], .text-arabic {
+    font-family: var(--font-arabic);
+    font-feature-settings: "kern" 1, "liga" 1;
+    color: var(--text-arabic);
+  }
+}
+
+@layer utilities {
+  .sun-glass {
+    background: var(--sun-glass);
+    border: 1px solid var(--sun-border);
+    backdrop-filter: blur(24px) saturate(1.4);
+    box-shadow: 0 0 80px rgba(255, 238, 2, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
+  }
+}

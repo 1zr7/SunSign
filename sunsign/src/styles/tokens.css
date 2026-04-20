@@ -1,0 +1,26 @@
+:root {
+  /* ── Brand Yellow ─────────────────────────── */
+  --sun-core:    #FFEE02;       /* primary yellow */
+  --sun-corona:  #FFD700;       /* slightly deeper gold */
+  --sun-warm:    #FFFBE6;       /* near-white yellow tint */
+  --sun-ray:     #FFEE02;       /* ray accent */
+
+  /* ── Black / White scale ─────────────────── */
+  --sun-void:    #000000;       /* pure black background */
+  --sun-dusk:    #111111;       /* very dark near-black */
+  --sun-surface: #1A1A1A;       /* card surface dark */
+
+  /* ── Glassmorphism (yellow-tinted) ────────── */
+  --sun-glass:   rgba(255, 238, 2, 0.06);
+  --sun-border:  rgba(255, 238, 2, 0.18);
+
+  /* ── Typography ──────────────────────────── */
+  --text-primary:   #FFFFFF;         /* pure white headings */
+  --text-secondary: #CCCCCC;         /* light grey body */
+  --text-arabic:    #FFEE02;         /* brand yellow for Arabic */
+
+  /* ── Fonts ───────────────────────────────── */
+  --font-brand:  'Cormorant Garamond', serif;
+  --font-arabic: 'Amiri', serif;
+  --font-ui:     'JetBrains Mono', monospace;
+}

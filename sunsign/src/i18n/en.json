@@ -1,0 +1,15 @@
+{
+  "translation": {
+    "app_name": "SunSign",
+    "app_tagline": "Where light speaks in every hand",
+    "mode_1": "Read My Hands",
+    "mode_2": "Speak in Light",
+    "settings": "Settings",
+    "appearance": "Appearance",
+    "performance": "Performance",
+    "accessibility": "Accessibility",
+    "about": "About SunSign",
+    "about_text": "Bridging silence and sound through the warmth of the sun. Hand gestures, like rays of sunlight, radiate meaning outward.",
+    "footer_os": "Open Source"
+  }
+}

@@ -1,0 +1,447 @@
+import { useEffect, useState, useRef, useCallback } from 'react';
+import * as tf from '@tensorflow/tfjs';
+import type { Results } from '@mediapipe/hands';
+
+// The three ways to detect signs based on the selected mode:
+// 'static' — Uses landmark data for letters (32 classes).
+// 'tcn'    — Uses sequences of frames for words (32 classes).
+// 'rgb'    — Uses the raw camera feed for 190 different signs.
+export type ModelConfig = 'static' | 'tcn' | 'rgb';
+
+export interface GesturePrediction {
+  type: 'letter' | 'word';
+  label: string;
+  confidence: number;
+}
+
+interface LabelEntry {
+  name: string;
+  arabic: string;
+}
+
+interface ModelPaths {
+  staticModel:     string | null;
+  staticLabelMap:  string | null;
+  dynamicModel:    string | null;
+  dynamicLabelMap: string | null;
+}
+
+const MODEL_PATHS: Record<ModelConfig, ModelPaths> = {
+  // Static letter detection
+  static: {
+    staticModel:     '/model/model.json',
+    staticLabelMap:  '/model/label_map.json',
+    dynamicModel:    null,
+    dynamicLabelMap: null,
+  },
+  // Video word detection
+  tcn: {
+    staticModel:     null,
+    staticLabelMap:  null,
+    dynamicModel:    '/model_tcn/model.json',
+    dynamicLabelMap: '/model_tcn/label_map_tcn.json',
+  },
+  // Full image sign detection
+  rgb: {
+    staticModel:     '/model_rgb/model.json',
+    staticLabelMap:  '/model_rgb/label_map_rgb.json',
+    dynamicModel:    null,
+    dynamicLabelMap: null,
+  },
+};
+
+// RGB model (MobileNetV2) may be exported as a TFJS graph model rather than a
+// layers model because the converter handles complex functional architectures
+// more reliably in graph format.  Both types share a .predict() method.
+type AnyModel = tf.LayersModel | tf.GraphModel;
+
+interface ModelState {
+  cnnModel:             AnyModel | null;
+  cnnLabelMap:          Record<string, LabelEntry | string> | null;
+  lstmModel:            tf.LayersModel | null;
+  lstmLabelMap:         Record<string, LabelEntry | string> | null;
+  dynamicInputFeatures: number;
+  dynamicInputTimeSteps: number | null;
+}
+
+export function useGestureModel(
+  lang: string = 'en',
+  modelConfig: ModelConfig = 'static',
+  videoRef?: React.RefObject<HTMLVideoElement>,
+) {
+  const [prediction, setPrediction]             = useState<GesturePrediction | null>(null);
+  const [modelLoaded, setModelLoaded]           = useState(false);
+  const [isModelSwitching, setIsModelSwitching] = useState(false);
+  const [tcnBufferReady, setTcnBufferReady]     = useState(false);
+  const [isHandPresent, setIsHandPresent]       = useState(false);
+  const workerRef      = useRef<Worker | undefined>(undefined);
+  const lastCallTime   = useRef<number>(0);
+  const modelConfigRef = useRef<ModelConfig>(modelConfig);
+  const modelStateRef  = useRef<ModelState>({
+    cnnModel: null, cnnLabelMap: null,
+    lstmModel: null, lstmLabelMap: null,
+    dynamicInputFeatures: 63,
+    dynamicInputTimeSteps: null,
+  });
+
+  // Keep track of the current mode
+  useEffect(() => { modelConfigRef.current = modelConfig; }, [modelConfig]);
+
+  // Load the selected models from the public folder
+  useEffect(() => {
+    let cancelled = false;
+    const ctrl = new AbortController();
+    setModelSwitching_and_clear();
+
+    const paths = MODEL_PATHS[modelConfig];
+
+    const loadModels = async () => {
+      try {
+        let staticModel: AnyModel | null = null;
+        let staticLabelMap: Record<string, LabelEntry | string> | null = null;
+
+        // Load the static classifier if it's in the config.
+        // For RGB (MobileNetV2) the export may be in graph-model format because
+        // the converter handles functional architectures better that way.
+        // Try layers model first; fall back to graph model silently.
+        if (paths.staticModel && paths.staticLabelMap) {
+          try {
+            staticModel = await tf.loadLayersModel(paths.staticModel);
+          } catch {
+            staticModel = await tf.loadGraphModel(paths.staticModel);
+          }
+          if (cancelled) { staticModel.dispose(); return; }
+          const res = await fetch(paths.staticLabelMap, { signal: ctrl.signal });
+          staticLabelMap = await res.json();
+        }
+
+        let dynamicModel: tf.LayersModel | null = null;
+        let dynamicLabelMap: Record<string, LabelEntry | string> | null = null;
+        let dynamicInputFeatures = 63;
+        let dynamicInputTimeSteps: number | null = null;
+
+        // Load the sequence classifier if it's in the config
+        if (paths.dynamicModel && paths.dynamicLabelMap) {
+          try {
+            dynamicModel = await tf.loadLayersModel(paths.dynamicModel);
+            if (cancelled) { dynamicModel.dispose(); staticModel?.dispose(); return; }
+            const res = await fetch(paths.dynamicLabelMap, { signal: ctrl.signal });
+            dynamicLabelMap = await res.json();
+            
+            // Check the model's expected input shape
+            const inputShape = dynamicModel.inputs[0].shape;
+            dynamicInputFeatures   = typeof inputShape[2] === 'number' ? inputShape[2] : 63;
+            dynamicInputTimeSteps  = typeof inputShape[1] === 'number' ? inputShape[1] : null;
+          } catch (err) {
+            console.warn(`Model info: Mode "${modelConfig}" is missing some files.`, err);
+          }
+        }
+
+        if (cancelled) {
+          staticModel?.dispose();
+          dynamicModel?.dispose();
+          return;
+        }
+
+        // Free up memory from old models before saving new ones
+        modelStateRef.current.cnnModel?.dispose();
+        modelStateRef.current.lstmModel?.dispose();
+
+        modelStateRef.current = {
+          cnnModel:             staticModel,
+          cnnLabelMap:          staticLabelMap,
+          lstmModel:            dynamicModel,
+          lstmLabelMap:         dynamicLabelMap,
+          dynamicInputFeatures,
+          dynamicInputTimeSteps,
+        };
+
+        setModelLoaded(true);
+        setIsModelSwitching(false);
+        console.log(`Model info: "${modelConfig}" ready.`);
+      } catch (err) {
+        console.error(`Error loading mode "${modelConfig}":`, err);
+        setIsModelSwitching(false);
+      }
+    };
+
+    loadModels();
+    return () => {
+      cancelled = true;
+      ctrl.abort();
+    };
+  }, [modelConfig]);
+
+  function setModelSwitching_and_clear() {
+    setIsModelSwitching(true);
+    setModelLoaded(false);
+    setPrediction(null);
+    setTcnBufferReady(false);
+  }
+
+  // Set the confidence needed to trigger a detection (higher means more strict)
+  const STATIC_THRESHOLD  = 0.65;
+  const DYNAMIC_THRESHOLD = 0.72;
+  const RGB_THRESHOLD     = 0.75;
+
+  // Overrides for specific letters that often get confused
+  const STATIC_CLASS_THRESHOLD: Record<number, number> = {
+    29: 0.87,  // yod
+    30: 0.87,  // alef maqsura
+  };
+
+  const debugCountRef = useRef(0);
+
+  // Settings for making static predictions more steady
+  const STATIC_STREAK_WINDOW = 4;
+  const STATIC_STREAK_NEEDED = 3;
+  const staticHistoryRef = useRef<string[]>([]);
+
+  // Set up the background worker for processing frames
+  useEffect(() => {
+    workerRef.current = new Worker(
+      new URL('../workers/preprocessWorker.ts', import.meta.url),
+      { type: 'module' },
+    );
+
+    workerRef.current.onmessage = async (e) => {
+      if (modelConfigRef.current === 'rgb') return;
+
+      const { hands, lstmSequence } = e.data;
+
+      // Reset predictions if no hand is visible
+      if (!hands || hands.length === 0) {
+        setIsHandPresent(false);
+        staticHistoryRef.current = [];
+        if (Date.now() - lastCallTime.current > 2000) {
+          setPrediction(null);
+          setTcnBufferReady(false);
+        }
+        return;
+      }
+
+      setIsHandPresent(true);
+
+      // Check if we have enough video frames for word detection
+      if (modelConfigRef.current === 'tcn') {
+        setTcnBufferReady(lstmSequence !== null);
+      }
+
+      // Limit how often we run the actual model
+      const now = Date.now();
+      if (now - lastCallTime.current < 150) return;
+      lastCallTime.current = now;
+
+      const { cnnModel, cnnLabelMap, lstmModel, lstmLabelMap, dynamicInputFeatures, dynamicInputTimeSteps }
+        = modelStateRef.current;
+
+      // Handle sequence/word prediction
+      let lstmPrediction: GesturePrediction | null = null;
+      if (lstmSequence && lstmModel && lstmLabelMap) {
+        try {
+          const padFrame = (frame: number[]) => {
+            if (frame.length >= dynamicInputFeatures) return frame;
+            return [...frame, ...Array(dynamicInputFeatures - frame.length).fill(0)];
+          };
+
+          let normSeq   = lstmSequence.normalized.map(padFrame);
+          let mirrorSeq = lstmSequence.mirrored.map(padFrame);
+
+          if (dynamicInputTimeSteps !== null) {
+            const fixLen = (seq: number[][]) => {
+              while (seq.length < dynamicInputTimeSteps)
+                seq.unshift(seq[0] || Array(dynamicInputFeatures).fill(0));
+              return seq.slice(-dynamicInputTimeSteps);
+            };
+            normSeq   = fixLen(normSeq);
+            mirrorSeq = fixLen(mirrorSeq);
+          }
+
+          const T = normSeq.length;
+          const inputTensor  = tf.tensor3d([normSeq, mirrorSeq], [2, T, dynamicInputFeatures]);
+          const outputTensor = lstmModel.predict(inputTensor) as tf.Tensor;
+          await tf.nextFrame();
+          const probs = await outputTensor.data();
+          inputTensor.dispose();
+          outputTensor.dispose();
+
+          const numClasses = probs.length / 2;
+          let maxProb = 0, bestIdx = 0;
+          for (let i = 0; i < probs.length; i++) {
+            if (probs[i] > maxProb) { maxProb = probs[i]; bestIdx = i % numClasses; }
+          }
+
+          const rawEntry = lstmLabelMap[String(bestIdx)];
+          const label = typeof rawEntry === 'object'
+            ? (lang === 'ar' && (rawEntry as LabelEntry).arabic
+                ? (rawEntry as LabelEntry).arabic
+                : (rawEntry as LabelEntry).name)
+            : rawEntry as string;
+
+          if (++debugCountRef.current % 10 === 0)
+            console.debug(`[Word Prediction] "${label}" ${(maxProb * 100).toFixed(1)}%`);
+
+          if (maxProb >= DYNAMIC_THRESHOLD && label)
+            lstmPrediction = { type: 'word', label, confidence: maxProb };
+        } catch (err) {
+          console.error('Word detection error:', err);
+        }
+      }
+
+      // Handle single-frame/letter prediction
+      let cnnPrediction: GesturePrediction | null = null;
+      if (cnnModel && cnnLabelMap) {
+        try {
+          const typedHands = hands as Array<{ normalized: number[]; mirrored: number[]; isRight: boolean }>;
+          const normRows   = typedHands.map(h => h.normalized).filter(r => r.length === 63);
+          const mirrorRows = typedHands.map(h => h.mirrored).filter(r => r.length === 63);
+
+          if (normRows.length > 0 || mirrorRows.length > 0) {
+            // Predict on both normal and mirrored landmarks at once
+            const allRows    = [...normRows, ...mirrorRows];
+            const inputTensor  = tf.tensor2d(allRows);
+            const outputTensor = cnnModel.predict(inputTensor) as tf.Tensor;
+            await tf.nextFrame();
+            const probs = await outputTensor.data();
+            inputTensor.dispose();
+            outputTensor.dispose();
+
+            const numClasses = probs.length / allRows.length;
+
+            const bestInSlice = (startRow: number, rowCount: number) => {
+              let maxP = 0, idx = 0;
+              for (let r = 0; r < rowCount; r++) {
+                for (let c = 0; c < numClasses; c++) {
+                  const p = probs[(startRow + r) * numClasses + c];
+                  if (p > maxP) { maxP = p; idx = c; }
+                }
+              }
+              return { maxP, idx };
+            };
+
+            const norm   = bestInSlice(0,             normRows.length);
+            const mirror = bestInSlice(normRows.length, mirrorRows.length);
+
+            // Choose the best prediction, preferring the normal orientation
+            const tryOrientation = (maxP: number, idx: number) => {
+              const thr = STATIC_CLASS_THRESHOLD[idx] ?? STATIC_THRESHOLD;
+              return maxP >= thr ? { maxP, idx, thr } : null;
+            };
+
+            const normResult   = tryOrientation(norm.maxP,   norm.idx);
+            const mirrorResult = tryOrientation(mirror.maxP, mirror.idx);
+            const chosen       = normResult ?? mirrorResult;
+
+            const maxP    = chosen?.maxP    ?? 0;
+            const bestIdx = chosen?.idx     ?? norm.idx;
+            const effectiveThreshold = chosen?.thr ?? (STATIC_CLASS_THRESHOLD[norm.idx] ?? STATIC_THRESHOLD);
+
+            const rawEntry = cnnLabelMap[String(bestIdx)];
+            const label = typeof rawEntry === 'object'
+              ? `${(rawEntry as LabelEntry).arabic} (${(rawEntry as LabelEntry).name})`
+              : rawEntry as string;
+
+            if (++debugCountRef.current % 8 === 0)
+              console.debug(`[Letter Prediction] "${label}" result=${(maxP*100).toFixed(1)}%`);
+
+            // Check if the prediction has been consistent for a few frames
+            const hist = staticHistoryRef.current;
+            if (chosen && label) {
+              hist.push(label);
+              if (hist.length > STATIC_STREAK_WINDOW) hist.shift();
+              const votes = hist.filter(l => l === label).length;
+              if (votes >= STATIC_STREAK_NEEDED)
+                cnnPrediction = { type: 'letter', label, confidence: maxP };
+            } else {
+              hist.push('');
+              if (hist.length > STATIC_STREAK_WINDOW) hist.shift();
+            }
+          }
+        } catch (err) {
+          console.error('Letter detection error:', err);
+        }
+      }
+
+      setPrediction(lstmPrediction ?? cnnPrediction ?? null);
+    };
+
+    return () => { workerRef.current?.terminate(); };
+  }, []);
+
+  // Handle predictions when using the camera feed directly
+  useEffect(() => {
+    if (modelConfig !== 'rgb' || !modelLoaded) return;
+
+    const rgbInterval = setInterval(async () => {
+      const video = videoRef?.current;
+      if (!video || video.readyState < 2 || video.videoWidth === 0) return;
+
+      const { cnnModel: rgbModel, cnnLabelMap: rgbLabelMap } = modelStateRef.current;
+      if (!rgbModel || !rgbLabelMap) return;
+
+      const now = Date.now();
+      if (now - lastCallTime.current < 150) return;
+      lastCallTime.current = now;
+
+      try {
+        // Prepare the video frame for the model
+        const tensor = tf.tidy(() =>
+          tf.browser.fromPixels(video)
+            .resizeBilinear([112, 112])
+            .expandDims(0)
+            .toFloat()
+            .div(127.5)
+            .sub(1)
+        );
+
+        // Yield to the browser before running inference so the first-run
+        // WebGL shader compilation doesn't freeze the UI thread.
+        await tf.nextFrame();
+
+        // Both LayersModel and GraphModel expose .predict(); cast via any to
+        // satisfy TypeScript when the model was loaded as a GraphModel.
+        const output = (rgbModel as any).predict(tensor) as tf.Tensor;
+        await tf.nextFrame();
+        const probs  = await output.data();
+        tensor.dispose();
+        output.dispose();
+
+        let maxProb = 0, maxIdx = 0;
+        for (let i = 0; i < probs.length; i++) {
+          if (probs[i] > maxProb) { maxProb = probs[i]; maxIdx = i; }
+        }
+
+        const rawEntry = rgbLabelMap[String(maxIdx)];
+        const label = typeof rawEntry === 'object'
+          ? (lang === 'ar' && (rawEntry as LabelEntry).arabic
+              ? (rawEntry as LabelEntry).arabic
+              : (rawEntry as LabelEntry).name)
+          : rawEntry as string;
+
+        if (++debugCountRef.current % 5 === 0)
+          console.debug(`[RGB Prediction] "${label}" ${(maxProb * 100).toFixed(1)}%`);
+
+        if (maxProb >= RGB_THRESHOLD && label)
+          setPrediction({ type: 'word', label, confidence: maxProb });
+        else if (Date.now() - lastCallTime.current > 2000)
+          setPrediction(null);
+      } catch (err) {
+        console.error('Camera detection error:', err);
+      }
+    }, 200);
+
+    return () => clearInterval(rgbInterval);
+  }, [modelConfig, modelLoaded, videoRef, lang]);
+
+  // Send the landmark data from MediaPipe to the worker
+  const processResults = useCallback((res: Results) => {
+    if (res?.multiHandLandmarks && modelLoaded && modelConfigRef.current !== 'rgb') {
+      workerRef.current?.postMessage({
+        landmarks:  res.multiHandLandmarks,
+        handedness: res.multiHandedness,
+      });
+    }
+  }, [modelLoaded]);
+
+  return { prediction, isReady: modelLoaded, isModelSwitching, tcnBufferReady, isHandPresent, processResults };
+}

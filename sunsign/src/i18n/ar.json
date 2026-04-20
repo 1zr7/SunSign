@@ -1,0 +1,15 @@
+{
+  "translation": {
+    "app_name": "SunSign",
+    "app_tagline": "نور يتكلم بكل يد",
+    "mode_1": "اقرأ يدي",
+    "mode_2": "كلّمني بالضوء",
+    "settings": "الإعدادات",
+    "appearance": "المظهر",
+    "performance": "الأداء",
+    "accessibility": "إمكانية الوصول",
+    "about": "عن SunSign",
+    "about_text": "جسر يربط بين الصمت والصوت، لغة الإشارة تنبعث هنا كأشعة الشمس، واضحة وقوية.",
+    "footer_os": "نظام مفتوح المصدر"
+  }
+}

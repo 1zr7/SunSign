@@ -1,0 +1,38 @@
+# ── Node / JS ─────────────────────────────────────────────────
+node_modules/
+dist/
+.cache/
+
+# ── Vite ──────────────────────────────────────────────────────
+.vite/
+
+# ── Python / ML ───────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# Large dataset files — images and YOLO label txts 
+sunsign/ml/dataset/images_data/
+
+# Generated / trained artifacts 
+sunsign/ml/dataset/landmarks/
+sunsign/ml/trained_model/
+sunsign/ml/scripts/hand_landmarker.task
+
+# ── OS ────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Editor ────────────────────────────────────────────────────
+.vscode/settings.json
+*.suo
+*.user
+
+# ── Logs / temp ───────────────────────────────────────────────
+*.log
+*.tmp
+npm-debug.log*
