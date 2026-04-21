@@ -1,12 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
-import type { Results } from '@mediapipe/hands';
+import type { Results } from '@mediapipe/holistic';
 
 /**
  * useSignDetection
  * ================
- * This hook starts the camera and the "Hand Finder" tool (MediaPipe).
- * It runs in a loop, taking pictures from the camera and finding where 
- * the hands are.
+ * This hook starts the camera and the "Holistic Finder" tool (MediaPipe).
+ * It runs in a loop, synchronously finding Pose, Face, and Both Hands.
  */
 
 export function useSignDetection(
@@ -18,7 +17,7 @@ export function useSignDetection(
   const [error, setError] = useState<string | null>(null);
   const [isModelReady, setIsModelReady] = useState(false);
 
-  const handsRef = useRef<any>(null);
+  const holisticRef = useRef<any>(null);
   const onResultsRef = useRef(onResults);
 
   // Keep our callback up-to-date
@@ -33,29 +32,31 @@ export function useSignDetection(
     let initTimeout: number;
 
     const initMediaPipe = async () => {
-      const { Hands } = window as any;
+      const { Holistic } = window as any;
       
       // Wait for the script to load from the internet
-      if (!Hands) {
+      if (!Holistic) {
          initTimeout = window.setTimeout(initMediaPipe, 500);
          return;
       }
 
-      if (!handsRef.current) {
-        handsRef.current = new Hands({
-          locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+      if (!holisticRef.current) {
+        holisticRef.current = new Holistic({
+          locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`
         });
 
-        // Setup the hand settings
-        handsRef.current.setOptions({
-          maxNumHands: 2,
-          modelComplexity: 0, // 0 is fastest (good for web)
+        // Setup holistic settings
+        holisticRef.current.setOptions({
+          modelComplexity: 1, // 1 is a good balance for accuracy vs speed
+          smoothLandmarks: true,
+          enableSegmentation: false,
+          refineFaceLandmarks: false,
           minDetectionConfidence: 0.5,
           minTrackingConfidence: 0.5
         });
 
-        // What happens when it finds a hand?
-        handsRef.current.onResults((res: Results) => {
+        // What happens when it finds a hand/pose?
+        holisticRef.current.onResults((res: Results) => {
           if (onResultsRef.current) {
             onResultsRef.current(res);
           }
@@ -69,7 +70,7 @@ export function useSignDetection(
 
     return () => {
       clearTimeout(initTimeout);
-      if (handsRef.current) handsRef.current.close();
+      if (holisticRef.current) holisticRef.current.close();
     };
   }, []);
 
@@ -96,8 +97,9 @@ export function useSignDetection(
 
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
+            width: { ideal: 640 },
+            height: { ideal: 480 },
+            frameRate: { ideal: 24, max: 30 },
             facingMode: 'user',
             ...(deviceId ? { deviceId } : {}),
           },
@@ -115,29 +117,37 @@ export function useSignDetection(
 
       let isProcessing = false;
       let lastVideoTime = -1;
+      let lastProcessTime = 0;
+      // Holistic is heavy — cap at ~20fps to prevent main-thread stalls
+      const PROCESS_INTERVAL_MS = 50;
 
-      // This function runs as fast as possible to find hands in the video
       const processFrame = async () => {
         if (cancelled) return;
-        
+
+        const now = performance.now();
         const video = videoRef.current;
-        if (video && video.readyState >= 2 && handsRef.current && isModelReady && !isProcessing) {
-          // Only process if the video has moved to a new frame
-          if (video.currentTime !== lastVideoTime) {
-            lastVideoTime = video.currentTime;
-            isProcessing = true;
-            try {
-              // Send the picture to the hand finder
-              await handsRef.current.send({ image: video });
-            } catch (err) {
-              console.error("Discovery error:", err);
-            } finally {
-              isProcessing = false;
-            }
+
+        if (
+          video &&
+          video.readyState >= 2 &&
+          holisticRef.current &&
+          isModelReady &&
+          !isProcessing &&
+          now - lastProcessTime >= PROCESS_INTERVAL_MS &&
+          video.currentTime !== lastVideoTime
+        ) {
+          lastVideoTime = video.currentTime;
+          lastProcessTime = now;
+          isProcessing = true;
+          try {
+            await holisticRef.current.send({ image: video });
+          } catch (err) {
+            console.error("Discovery error:", err);
+          } finally {
+            isProcessing = false;
           }
         }
-        
-        // Keep the loop going
+
         animationFrameId = requestAnimationFrame(processFrame);
       };
 
@@ -146,7 +156,7 @@ export function useSignDetection(
          processFrame();
       } else {
          const checkReady = setInterval(() => {
-            if (handsRef.current && isModelReady) {
+            if (holisticRef.current && isModelReady) {
                 clearInterval(checkReady);
                 processFrame();
             }

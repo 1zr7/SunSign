@@ -59,6 +59,30 @@ export function GLBAvatar({
   const onCompleteRef = useRef(onSignComplete);
   useEffect(() => { onCompleteRef.current = onSignComplete; }, [onSignComplete]);
 
+  // -- Cache Bones for Idle Pose --
+  // We MUST cache these instead of searching for them every frame in the render loop,
+  // otherwise we traverse the entire mesh hundreds of times a second and crash performance!
+  const bonesRef = useRef<{ lArm: THREE.Bone | null; rArm: THREE.Bone | null; lHand: THREE.Bone | null; rHand: THREE.Bone | null }>({
+    lArm: null, rArm: null, lHand: null, rHand: null
+  });
+
+  useEffect(() => {
+    if (!gltf?.scene) return;
+    const findBone = (name: string): THREE.Bone | null => {
+      let result: THREE.Bone | null = null;
+      gltf.scene.traverse((obj: any) => {
+        if (obj.isBone && obj.name === name) result = obj;
+      });
+      return result;
+    };
+    bonesRef.current = {
+      lArm: findBone('mixamorigLeftArm'),
+      rArm: findBone('mixamorigRightArm'),
+      lHand: findBone('mixamorigLeftHand'),
+      rHand: findBone('mixamorigRightHand'),
+    };
+  }, [gltf]);
+
   // -- Animation Player --
   // This effect runs every time a new word (sign) is picked.
   useEffect(() => {
@@ -176,18 +200,7 @@ export function GLBAvatar({
     if (!actionRef.current && gltf?.scene) {
       const lerpSpeed = Math.min(1, 4 * delta); // How fast it moves to the idle pose
       
-      const findBone = (name: string): THREE.Bone | null => {
-        let result: THREE.Bone | null = null;
-        gltf.scene.traverse((obj: any) => {
-          if (obj.isBone && obj.name === name) result = obj;
-        });
-        return result;
-      };
-
-      const lArm  = findBone('mixamorigLeftArm');
-      const rArm  = findBone('mixamorigRightArm');
-      const lHand = findBone('mixamorigLeftHand');
-      const rHand = findBone('mixamorigRightHand');
+      const { lArm, rArm, lHand, rHand } = bonesRef.current;
       
       // Rotations to make the arms drop down
       const downLeft  = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, -1.2));
@@ -233,7 +246,9 @@ export default function HandScene({
     }}>
       <Canvas
         camera={{ position: [0, 0, 4.5], fov: 40 }}
-        gl={{ alpha: false }}
+        gl={{ alpha: false, antialias: false }}
+        dpr={[1, 1.5]}
+        performance={{ min: 0.5 }}
         onCreated={({ scene }) => { scene.background = new THREE.Color(0x000000); }}
       >
         <NebulaBackground />

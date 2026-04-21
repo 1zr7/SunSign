@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Volume2, Delete, Trash2, Pencil } from 'lucide-react';
+import { Volume2, Delete, Trash2, Pencil, ChevronDown, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { translateText } from '../hooks/useTranslationApi';
 import { SUPPORTED_LANGUAGES } from '../utils/languages';
@@ -41,7 +41,22 @@ export default function SignInputRecorder({
   const [translatedText, setTranslatedText] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [editDraft, setEditDraft] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isDropdownOpen]);
   
   const fullText = sentence;
 
@@ -78,24 +93,68 @@ export default function SignInputRecorder({
       {/* -- Action Buttons (Speak, Delete, Clear, Language) -- */}
       <div className="flex items-center justify-between px-2">
         <div className="flex gap-3">
-          <div className="relative inline-block">
-            {/* Language Dropdown */}
-            <select
-              value={outLangCode}
-              onChange={(e) => setOutLangCode(e.target.value)}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-              title="Select Output Language"
-            >
-              {SUPPORTED_LANGUAGES.map(l => (
-                <option key={l.code} value={l.code}>{l.name}</option>
-              ))}
-            </select>
+          <div className="relative" ref={dropdownRef}>
+            {/* Custom Language Dropdown */}
             <button 
               type="button"
-              className="p-3 rounded-full sun-glass hover:bg-sun-core/20 text-sun-warm transition-all duration-300 font-ui font-bold text-sm min-w-[3rem] pointer-events-none"
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className={`p-3 px-4 rounded-full sun-glass hover:bg-sun-core/20 text-sun-warm transition-all duration-300 font-ui font-bold text-sm min-w-[4.5rem] flex items-center justify-between gap-2 border ${isDropdownOpen ? 'border-sun-core/50 bg-sun-core/10' : 'border-sun-border'}`}
             >
-              {currentLang.label}
+              <span>{currentLang.label}</span>
+              <motion.div
+                animate={{ rotate: isDropdownOpen ? 180 : 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <ChevronDown size={14} className="opacity-60" />
+              </motion.div>
             </button>
+
+            <AnimatePresence>
+              {isDropdownOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                  className="absolute bottom-full left-0 mb-3 z-[100] min-w-[340px] sun-glass border border-sun-core/30 shadow-[0_10px_40px_rgba(0,0,0,0.6)] overflow-hidden"
+                >
+                  <div className="p-2 flex flex-col gap-2 bg-sun-void/95 shadow-2xl">
+                    <div className="px-3 py-2 text-[10px] uppercase tracking-widest text-text-secondary/50 border-b border-sun-border/30 mb-1">
+                      Translate to
+                    </div>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {SUPPORTED_LANGUAGES.map(l => {
+                        const isActive = outLangCode === l.code;
+                        return (
+                          <button
+                            key={l.code}
+                            onClick={() => {
+                              setOutLangCode(l.code);
+                              setIsDropdownOpen(false);
+                            }}
+                            className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-ui transition-all duration-200 group
+                              ${isActive 
+                                ? 'bg-sun-core/20 text-sun-core font-bold' 
+                                : 'text-text-secondary hover:bg-sun-core/10 hover:text-text-primary'
+                              }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className={`w-8 h-5 flex items-center justify-center rounded bg-sun-void/50 border border-sun-border/40 text-[10px] tracking-tighter ${isActive ? 'border-sun-core/40' : ''}`}>
+                                {l.label}
+                              </span>
+                              <span>{l.name}</span>
+                            </div>
+                            {isActive && (
+                              <Check size={14} className="text-sun-core" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
           
           <button 

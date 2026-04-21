@@ -1,0 +1,130 @@
+{
+  "0": {
+    "name": "Alhamdulillah",
+    "arabic": "الحمد لله"
+  },
+  "1": {
+    "name": "Good bye",
+    "arabic": "مع السلامة"
+  },
+  "2": {
+    "name": "Good evening",
+    "arabic": "مساء الخير"
+  },
+  "3": {
+    "name": "Good morning",
+    "arabic": "صباح الخير"
+  },
+  "4": {
+    "name": "How are you",
+    "arabic": "كيف حالك"
+  },
+  "5": {
+    "name": "I am fine",
+    "arabic": "أنا بخير"
+  },
+  "6": {
+    "name": "I am pleased to meet you",
+    "arabic": "يسعدني لقاءك"
+  },
+  "7": {
+    "name": "I am sorry",
+    "arabic": "أنا آسف"
+  },
+  "8": {
+    "name": "Not bad",
+    "arabic": "ليس سيئاً"
+  },
+  "9": {
+    "name": "Salam aleikum",
+    "arabic": "السلام عليكم"
+  },
+  "10": {
+    "name": "Sorry",
+    "arabic": "آسف"
+  },
+  "11": {
+    "name": "Thanks",
+    "arabic": "شكراً"
+  },
+  "12": {
+    "name": "baby",
+    "arabic": "طفل"
+  },
+  "13": {
+    "name": "eat",
+    "arabic": "يأكل"
+  },
+  "14": {
+    "name": "father",
+    "arabic": "أب"
+  },
+  "15": {
+    "name": "finish",
+    "arabic": "ينهي"
+  },
+  "16": {
+    "name": "good",
+    "arabic": "جيد"
+  },
+  "17": {
+    "name": "happy",
+    "arabic": "سعيد"
+  },
+  "18": {
+    "name": "hear",
+    "arabic": "يسمع"
+  },
+  "19": {
+    "name": "house",
+    "arabic": "منزل"
+  },
+  "20": {
+    "name": "important",
+    "arabic": "مهم"
+  },
+  "21": {
+    "name": "love",
+    "arabic": "حب"
+  },
+  "22": {
+    "name": "mall",
+    "arabic": "مول"
+  },
+  "23": {
+    "name": "me",
+    "arabic": "أنا"
+  },
+  "24": {
+    "name": "mosque",
+    "arabic": "مسجد"
+  },
+  "25": {
+    "name": "mother",
+    "arabic": "أم"
+  },
+  "26": {
+    "name": "normal",
+    "arabic": "عادي"
+  },
+  "27": {
+    "name": "sad",
+    "arabic": "حزين"
+  },
+  "28": {
+    "name": "stop",
+    "arabic": "قف"
+  },
+  "29": {
+    "name": "thanks",
+    "arabic": "شكراً"
+  },
+  "30": {
+    "name": "thinking",
+    "arabic": "يفكر"
+  },
+  "31": {
+    "name": "worry",
+    "arabic": "يقلق"
+  }
+}

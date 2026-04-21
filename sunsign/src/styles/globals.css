@@ -45,4 +45,18 @@
     box-shadow: 0 0 80px rgba(255, 238, 2, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.06);
     border-radius: 20px;
   }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--sun-border);
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--sun-core);
+  }
 }

@@ -10,6 +10,8 @@
     "accessibility": "Accessibility",
     "about": "About SunSign",
     "about_text": "Bridging silence and sound through the warmth of the sun. Hand gestures, like rays of sunlight, radiate meaning outward.",
-    "footer_os": "Open Source"
+    "footer_os": "Open Source",
+    "recording": "Recording",
+    "start_signing": "Start signing..."
   }
 }

@@ -15,6 +15,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import type { GesturePrediction } from './useGestureModel';
 import { arabicDictionary } from '../utils/arabicDictionary';
+import { useAudio } from './useAudio';
 
 // -- Timing Settings --
 const HOLD_MS      = 1500;   // How long to hold a letter (1.5 seconds)
@@ -50,7 +51,9 @@ export interface FingerSpellingControls {
 export function useFingerSpelling(
   prediction: GesturePrediction | null,
   isHandPresent: boolean = false,
+  soundChimes: boolean = true,
 ): FingerSpellingState & FingerSpellingControls {
+  const { playChime } = useAudio();
   // -- React State (things that trigger a redraw) --
   const [currentLetter, setCurrentLetter] = useState<string | null>(null);
   const [holdProgress,  setHoldProgress]  = useState(0);
@@ -250,6 +253,7 @@ export function useFingerSpelling(
 
         if (pct >= 100) {
           // Success! Letter typed.
+          if (soundChimes) playChime();
           // We only take the Arabic part of the label (e.g. 'ب' from 'ب (baa)')
           appendLetter(label.split(' ')[0]);
           
@@ -265,12 +269,17 @@ export function useFingerSpelling(
 
       rafId.current = requestAnimationFrame(tick);
     }
+    // No regular cleanup here. We handle stopAnimation explicitly 
+    // when the label changes or prediction goes away to avoid resetting
+    // the progress on simple confidence value changes (which create a new object).
+  }, [prediction, isHandPresent, appendLetter, commitWord, stopAnimation, stopWordTimer]);
 
+  // Clean up animation if component unmounts
+  useEffect(() => {
     return () => {
-      // Cleanup when the prediction changes
       stopAnimation();
     };
-  }, [prediction, isHandPresent, appendLetter, commitWord, stopAnimation, stopWordTimer]);
+  }, [stopAnimation]);
 
   // Combine everything into one string for the display
   const sentenceParts = currentWord

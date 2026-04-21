@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
-import { Mic, Send, MicOff, Globe, Loader2 } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Mic, Send, MicOff, Globe, Loader2, ChevronDown, Check } from 'lucide-react';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { translateText } from '../hooks/useTranslationApi';
 import { SUPPORTED_LANGUAGES } from '../utils/languages';
@@ -22,7 +23,22 @@ export default function TextInput({ onSubmit, disabled }: TextInputProps) {
   const [text, setText] = useState('');
   const [langCode, setLangCode] = useState('ar');
   const [isTranslating, setIsTranslating] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { isListening, transcript, startListening, clearTranscript } = useSpeechRecognition();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isDropdownOpen]);
 
   // If you use the microphone, add the heard words to the text box
   useEffect(() => {
@@ -67,23 +83,68 @@ export default function TextInput({ onSubmit, disabled }: TextInputProps) {
         
         {/* Buttons for Microphone, Language, and Send */}
         <div className={`absolute ${langCode === 'ar' ? 'left-2' : 'right-2'} flex gap-2`}>
-          <div className="relative inline-block">
-            <select
-              value={langCode}
-              onChange={(e) => setLangCode(e.target.value)}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-              title="Select Input Language"
-            >
-              {SUPPORTED_LANGUAGES.map(l => (
-                <option key={l.code} value={l.code}>{l.name}</option>
-              ))}
-            </select>
+          <div className="relative" ref={dropdownRef}>
+            {/* Custom Language Dropdown (Avatar Side) */}
             <button
               type="button"
-              className="p-3 bg-sun-surface text-text-secondary rounded-xl hover:text-sun-warm transition-colors font-ui font-bold text-sm flex items-center justify-center w-11 h-11 pointer-events-none"
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className={`p-3 bg-sun-surface text-text-secondary rounded-xl hover:text-sun-warm transition-all duration-300 font-ui font-bold text-sm flex items-center justify-between w-14 h-11 border ${isDropdownOpen ? 'border-sun-core/50 bg-sun-core/10 text-sun-warm' : 'border-transparent'}`}
             >
-              {currentLang.label}
+              <span>{currentLang.label}</span>
+              <motion.div
+                animate={{ rotate: isDropdownOpen ? 180 : 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <ChevronDown size={14} className="opacity-40" />
+              </motion.div>
             </button>
+
+            <AnimatePresence>
+              {isDropdownOpen && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                  transition={{ duration: 0.2 }}
+                  className={`absolute bottom-full mb-3 z-[150] min-w-[340px] sun-glass border border-sun-core/30 shadow-[0_10px_40px_rgba(0,0,0,0.6)] overflow-hidden ${langCode === 'ar' ? 'left-0' : 'right-0'}`}
+                >
+                  <div className="p-2 flex flex-col gap-2 bg-sun-void/98 shadow-2xl">
+                    <div className="px-3 py-2 text-[10px] uppercase tracking-widest text-text-secondary/50 border-b border-sun-border/30 mb-1">
+                      Translate FROM
+                    </div>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {SUPPORTED_LANGUAGES.map(l => {
+                        const isActive = langCode === l.code;
+                        return (
+                          <button
+                            key={l.code}
+                            onClick={() => {
+                              setLangCode(l.code);
+                              setIsDropdownOpen(false);
+                            }}
+                            className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-ui transition-all duration-200 group
+                              ${isActive 
+                                ? 'bg-sun-core/20 text-sun-core font-bold' 
+                                : 'text-text-secondary hover:bg-sun-core/10 hover:text-text-primary'
+                              }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className={`w-7 h-4 flex items-center justify-center rounded bg-sun-void/50 border border-sun-border/40 text-[9px] tracking-tighter ${isActive ? 'border-sun-core/40' : ''}`}>
+                                {l.label}
+                              </span>
+                              <span>{l.name}</span>
+                            </div>
+                            {isActive && (
+                              <Check size={12} className="text-sun-core" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
           
           <button

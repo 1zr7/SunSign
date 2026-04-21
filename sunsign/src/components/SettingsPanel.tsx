@@ -43,26 +43,24 @@ const MODELS: ModelMeta[] = [
     icon: '✋',
   },
   {
-    id: 'tcn',
-    name: 'Video — Movement Signs',
-    subtitle: 'Tracks Motion',
-    description:
-      'Watches your hand move over time. Best for signs that involve movement (like "thinking").',
-    acc: '98.5%',
+    id: 'dual_lstm',
+    name: 'Dual-Hand Pose LSTM',
+    subtitle: 'High Accuracy',
+    description: 'Tracks both hands and their placement relative to the body for ultimate precision.',
+    acc: '98%',
     accLabel: 'Accuracy',
-    vocab: '32 words & phrases',
-    icon: '🤝',
+    vocab: 'Words & Body',
+    icon: '✨',
   },
   {
-    id: 'rgb',
-    name: 'RGB — Raw Video',
-    subtitle: 'Heavy · Pro Model',
-    description:
-      'Looks at the whole video without landmarks. Knows the most signs but takes more computer power.',
-    acc: '98.5%',
-    accLabel: 'Top-1 Score',
-    vocab: '190 KArSL signs',
-    icon: '🎥',
+    id: 'combined',
+    name: 'Hybrid — Smart Dual Mode',
+    subtitle: 'Best All-Rounder',
+    description: 'Runs both the static alphabet recognizer AND the dynamic Dual-Hand LSTM simultaneously.',
+    acc: '98%',
+    accLabel: 'Accuracy',
+    vocab: 'Words & ABCs',
+    icon: '🔮',
   },
 ];
 
@@ -74,11 +72,17 @@ interface SettingsPanelProps {
   modelConfig: ModelConfig;
   onModelConfigChange: (config: ModelConfig) => void;
   isModelSwitching: boolean;
+  highContrast: boolean;
+  onHighContrastToggle: () => void;
+  soundChimes: boolean;
+  onSoundChimesToggle: () => void;
 }
 
 export default function SettingsPanel({
   isOpen, onClose, lang, toggleLang,
   modelConfig, onModelConfigChange, isModelSwitching,
+  highContrast, onHighContrastToggle,
+  soundChimes, onSoundChimesToggle,
 }: SettingsPanelProps) {
   const { t } = useTranslation();
 
@@ -354,20 +358,41 @@ export default function SettingsPanel({
                 </AnimatePresence>
               </div>
 
-              {/* Accessibility Settings */}
               <div className="space-y-4">
                 <h3 className="font-ui text-xs uppercase tracking-[0.2em] text-text-secondary">{t('accessibility')}</h3>
+                
+                {/* High Contrast Toggle */}
                 <div className="flex items-center justify-between p-4 bg-sun-void/40 rounded-xl border border-sun-border">
-                  <span className="font-arabic text-lg text-text-primary">High Contrast Effect</span>
-                  <div className="w-12 h-6 bg-sun-surface rounded-full p-1 cursor-pointer">
-                    <div className="w-4 h-4 bg-sun-core rounded-full" />
+                  <div className="flex flex-col">
+                    <span className="font-ui text-sm text-text-primary">High Contrast Effect</span>
+                    <span className="font-ui text-[10px] text-text-secondary mt-0.5">Simplify UI for readability</span>
                   </div>
+                  <button
+                    onClick={onHighContrastToggle}
+                    className={`relative w-12 h-6 rounded-full transition-colors ${highContrast ? 'bg-sun-core' : 'bg-sun-surface'}`}
+                  >
+                    <motion.div
+                      animate={{ x: highContrast ? 24 : 2 }}
+                      className="absolute top-1 w-4 h-4 bg-white rounded-full shadow"
+                    />
+                  </button>
                 </div>
+
+                {/* Sound Chimes Toggle */}
                 <div className="flex items-center justify-between p-4 bg-sun-void/40 rounded-xl border border-sun-border">
-                  <span className="font-arabic text-lg text-text-primary">Sound Chimes</span>
-                  <div className="w-12 h-6 bg-sun-core/20 rounded-full p-1 cursor-pointer relative">
-                    <div className="w-4 h-4 bg-sun-core rounded-full absolute right-1" />
+                  <div className="flex flex-col">
+                    <span className="font-ui text-sm text-text-primary">Sound Chimes</span>
+                    <span className="font-ui text-[10px] text-text-secondary mt-0.5">Audio feedback for recognition</span>
                   </div>
+                  <button
+                    onClick={onSoundChimesToggle}
+                    className={`relative w-12 h-6 rounded-full transition-colors ${soundChimes ? 'bg-sun-core' : 'bg-sun-surface'}`}
+                  >
+                    <motion.div
+                      animate={{ x: soundChimes ? 24 : 2 }}
+                      className="absolute top-1 w-4 h-4 bg-white rounded-full shadow"
+                    />
+                  </button>
                 </div>
               </div>
 

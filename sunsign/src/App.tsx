@@ -34,19 +34,39 @@ export default function App() {
   // Decide which model to use (Static letters, TCN movement, or RGB video)
   const [modelConfig, setModelConfig] = useState<ModelConfig>(() => {
     const stored = localStorage.getItem('sunsign_model_config') as ModelConfig;
-    const valid: ModelConfig[] = ['static', 'tcn', 'rgb'];
+    const valid: ModelConfig[] = ['static', 'dual_lstm', 'combined'];
     if (valid.includes(stored)) return stored;
-    // Fallback for old versions
-    if (stored === 'pointnet' || stored === 'standard') return 'static';
-    if (stored === 'pointnet_tcn') return 'tcn';
     return 'static';
   });
+
+  const [highContrast, setHighContrast] = useState(() => 
+    localStorage.getItem('sunsign_high_contrast') === 'true'
+  );
+  const [soundChimes, setSoundChimes] = useState(() => 
+    localStorage.getItem('sunsign_sound_chimes') !== 'false' // Default to true
+  );
 
   const { t, i18n } = useTranslation();
 
   const handleModelConfigChange = useCallback((config: ModelConfig) => {
     setModelConfig(config);
     localStorage.setItem('sunsign_model_config', config);
+  }, []);
+
+  const toggleHighContrast = useCallback(() => {
+    setHighContrast(prev => {
+      const next = !prev;
+      localStorage.setItem('sunsign_high_contrast', String(next));
+      return next;
+    });
+  }, []);
+
+  const toggleSoundChimes = useCallback(() => {
+    setSoundChimes(prev => {
+      const next = !prev;
+      localStorage.setItem('sunsign_sound_chimes', String(next));
+      return next;
+    });
   }, []);
 
   const handleLoadingComplete = useCallback(() => setLoadingComplete(true), []);
@@ -81,38 +101,38 @@ export default function App() {
    * Logic: It checks for "ghost hands" (MediaPipe glitching) and 
    * only keeps the most solid one.
    */
-  const handleResults = useCallback((res: Results) => {
-    const WRIST_THRESHOLD = 0.15;
-    const rawLM  = (res.multiHandLandmarks  ?? []) as any[][];
-    const rawHed = (res.multiHandedness     ?? []) as any[];
-    const kept: number[] = [];
-
-    for (let i = 0; i < rawLM.length; i++) {
-      const wi = rawLM[i][0];
-      const isDup = kept.some(j => {
-        const wj = rawLM[j][0];
-        const dx = wi.x - wj.x, dy = wi.y - wj.y;
-        return Math.sqrt(dx * dx + dy * dy) < WRIST_THRESHOLD;
-      });
-      if (!isDup) kept.push(i);
+  const handleResults = useCallback((res: any) => {
+    // MediaPipe Holistic gives us separate hand/pose arrays instead of one multi-hand array.
+    // We convert it back into the "Hands" format so the rest of the app doesn't break.
+    const rawLM: any[][] = [];
+    const rawHed: any[] = [];
+    
+    if (res.leftHandLandmarks) {
+       // MediaPipe's "Left" is usually the user's Right hand in selfie view
+       rawLM.push(res.leftHandLandmarks);
+       rawHed.push({ label: 'Left', score: 1 }); 
+    }
+    if (res.rightHandLandmarks) {
+       rawLM.push(res.rightHandLandmarks);
+       rawHed.push({ label: 'Right', score: 1 });
     }
 
-    const dedupedRes = kept.length === rawLM.length
-      ? res
-      : { ...res,
-          multiHandLandmarks: kept.map(i => rawLM[i]),
-          multiHandedness:    kept.map(i => rawHed[i]) };
+    const dedupedRes = {
+        ...res,
+        multiHandLandmarks: rawLM,
+        multiHandedness: rawHed
+    };
 
-    // Send the clean hand data to the model and draw the dots on the screen
+    // Send the clean data to the model and draw the dots on the screen
     processResults(dedupedRes as Results);
-    drawLandmarks(canvasRef.current, dedupedRes);
+    drawLandmarks(canvasRef.current, videoRef.current, dedupedRes);
   }, [processResults]);
 
   // Starts the camera and detection loop
   const { isActive: isCamActive, isModelReady } = useSignDetection(videoRef, handleResults, loadingComplete);
 
   // Tools for spelling words and making the computer talk
-  const fingerSpelling = useFingerSpelling(prediction, isHandPresent);
+  const fingerSpelling = useFingerSpelling(prediction, isHandPresent, soundChimes);
   const { speak } = useTTS();
 
   return (
@@ -129,10 +149,10 @@ export default function App() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1 }}
-          className="relative w-full h-[100dvh] overflow-hidden flex flex-col font-ui"
+          className={`relative w-full h-[100dvh] overflow-hidden flex flex-col font-ui ${highContrast ? 'high-contrast' : ''}`}
         >
           {/* Animated space-themed background */}
-          <SolarBackground />
+          <SolarBackground highContrast={highContrast} />
 
           {/* Hidden settings sidebar */}
           <SettingsPanel
@@ -143,6 +163,10 @@ export default function App() {
             modelConfig={modelConfig}
             onModelConfigChange={handleModelConfigChange}
             isModelSwitching={isModelSwitching}
+            highContrast={highContrast}
+            onHighContrastToggle={toggleHighContrast}
+            soundChimes={soundChimes}
+            onSoundChimesToggle={toggleSoundChimes}
           />
 
           {/* Top Header */}
@@ -194,17 +218,7 @@ export default function App() {
                   isDetectingSign={prediction !== null && prediction.confidence > 0.70}
                 />
                 
-                {/* Small indicator when the model is still warming up */}
-                {modelConfig === 'tcn' && isGestureModelReady && !tcnBufferReady && (
-                  <div className="absolute top-3 left-3 z-30 flex items-center gap-1.5
-                                  bg-sun-void/70 backdrop-blur-sm rounded-full px-3 py-1
-                                  border border-sun-core/30">
-                    <span className="w-1.5 h-1.5 rounded-full bg-sun-core animate-pulse" />
-                    <span className="font-ui text-[10px] uppercase tracking-widest text-sun-core/80">
-                      Hold sign to buffer…
-                    </span>
-                  </div>
-                )}
+
 
                 {/* Score badge: how sure is the AI about this sign? */}
                 <div className="absolute bottom-4 right-4 z-30">

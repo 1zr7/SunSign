@@ -10,9 +10,10 @@ import { motion } from 'framer-motion';
 interface SunSignLogoProps {
   className?: string;
   size?: number;
+  style?: React.CSSProperties;
 }
 
-export default function SunSignLogo({ className = '', size = 64 }: SunSignLogoProps) {
+export default function SunSignLogo({ className = '', size = 64, style = {} }: SunSignLogoProps) {
   return (
     <motion.img
       src="/sunsign-logo.svg"
@@ -20,7 +21,7 @@ export default function SunSignLogo({ className = '', size = 64 }: SunSignLogoPr
       width={size}
       height={size}
       className={`${className}`}
-      style={{ width: size, height: size, objectFit: 'contain' }}
+      style={{ ...style, width: size, height: size, objectFit: 'contain' }}
       // This makes the logo fade in and spin slightly when the app starts
       initial={{ opacity: 0, rotate: -30, scale: 0.7 }}
       animate={{ opacity: 1, rotate: 0, scale: 1 }}

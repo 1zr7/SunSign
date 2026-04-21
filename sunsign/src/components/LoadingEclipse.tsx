@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import SunSignLogo from './SunSignLogo';
 
 /**
  * LoadingEclipse
@@ -46,8 +47,12 @@ export default function LoadingEclipse({ progress, onComplete }: LoadingEclipseP
         >
           {/* -- The Eclipse Visual -- */}
           <div className="relative w-64 h-64 mb-12 flex items-center justify-center">
-            {/* The Sun (big yellow glow) */}
-            <div className="absolute w-40 h-40 rounded-full bg-sun-core" style={{ boxShadow: '0 0 60px var(--sun-corona)' }}></div>
+            {/* The Sun (Logo) */}
+            <SunSignLogo 
+              size={160} 
+              className="absolute z-0" 
+              style={{ filter: 'drop-shadow(0 0 30px var(--sun-corona))' }} 
+            />
             
             {/* The Progress Ring around the sun */}
             <svg className="absolute w-52 h-52 -rotate-90 pointer-events-none">
@@ -65,12 +70,12 @@ export default function LoadingEclipse({ progress, onComplete }: LoadingEclipseP
               />
             </svg>
 
-            {/* The Moon (black circle that covers the sun) */}
+            {/* The Moon (starts centered, moves away to reveal) */}
             <motion.div 
-              initial={{ x: -100 }}
-              animate={{ x: stage === 'eclipsing' ? -20 : 0 }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
-              className="absolute w-40 h-40 rounded-full bg-sun-void"
+              initial={{ x: 0 }}
+              animate={{ x: stage === 'eclipsing' ? 0 : 160 }}
+              transition={{ duration: 1.8, ease: "easeInOut" }}
+              className="absolute w-40 h-40 rounded-full bg-sun-void z-10"
             />
           </div>
 

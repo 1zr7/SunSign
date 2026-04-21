@@ -6,7 +6,7 @@ import type { Results } from '@mediapipe/hands';
 // 'static' — Uses landmark data for letters (32 classes).
 // 'tcn'    — Uses sequences of frames for words (32 classes).
 // 'rgb'    — Uses the raw camera feed for 190 different signs.
-export type ModelConfig = 'static' | 'tcn' | 'rgb';
+export type ModelConfig = 'static' | 'dual_lstm' | 'combined';
 
 export interface GesturePrediction {
   type: 'letter' | 'word';
@@ -27,26 +27,23 @@ interface ModelPaths {
 }
 
 const MODEL_PATHS: Record<ModelConfig, ModelPaths> = {
-  // Static letter detection
   static: {
     staticModel:     '/model/model.json',
     staticLabelMap:  '/model/label_map.json',
     dynamicModel:    null,
     dynamicLabelMap: null,
   },
-  // Video word detection
-  tcn: {
+  dual_lstm: {
     staticModel:     null,
     staticLabelMap:  null,
-    dynamicModel:    '/model_tcn/model.json',
-    dynamicLabelMap: '/model_tcn/label_map_tcn.json',
+    dynamicModel:    '/model_dual_lstm/model.json',
+    dynamicLabelMap: '/model_dual_lstm/label_map_dual_lstm.json',
   },
-  // Full image sign detection
-  rgb: {
-    staticModel:     '/model_rgb/model.json',
-    staticLabelMap:  '/model_rgb/label_map_rgb.json',
-    dynamicModel:    null,
-    dynamicLabelMap: null,
+  combined: {
+    staticModel:     '/model/model.json',
+    staticLabelMap:  '/model/label_map.json',
+    dynamicModel:    '/model_dual_lstm/model.json',
+    dynamicLabelMap: '/model_dual_lstm/label_map_dual_lstm.json',
   },
 };
 
@@ -205,8 +202,6 @@ export function useGestureModel(
     );
 
     workerRef.current.onmessage = async (e) => {
-      if (modelConfigRef.current === 'rgb') return;
-
       const { hands, lstmSequence } = e.data;
 
       // Reset predictions if no hand is visible
@@ -222,11 +217,6 @@ export function useGestureModel(
 
       setIsHandPresent(true);
 
-      // Check if we have enough video frames for word detection
-      if (modelConfigRef.current === 'tcn') {
-        setTcnBufferReady(lstmSequence !== null);
-      }
-
       // Limit how often we run the actual model
       const now = Date.now();
       if (now - lastCallTime.current < 150) return;
@@ -240,7 +230,7 @@ export function useGestureModel(
       if (lstmSequence && lstmModel && lstmLabelMap) {
         try {
           const padFrame = (frame: number[]) => {
-            if (frame.length >= dynamicInputFeatures) return frame;
+            if (frame.length >= dynamicInputFeatures) return frame.slice(0, dynamicInputFeatures);
             return [...frame, ...Array(dynamicInputFeatures - frame.length).fill(0)];
           };
 
@@ -368,77 +358,18 @@ export function useGestureModel(
     return () => { workerRef.current?.terminate(); };
   }, []);
 
-  // Handle predictions when using the camera feed directly
-  useEffect(() => {
-    if (modelConfig !== 'rgb' || !modelLoaded) return;
+  // Hand presence flag is updated by the worker. No extra interval needed.
 
-    const rgbInterval = setInterval(async () => {
-      const video = videoRef?.current;
-      if (!video || video.readyState < 2 || video.videoWidth === 0) return;
-
-      const { cnnModel: rgbModel, cnnLabelMap: rgbLabelMap } = modelStateRef.current;
-      if (!rgbModel || !rgbLabelMap) return;
-
-      const now = Date.now();
-      if (now - lastCallTime.current < 150) return;
-      lastCallTime.current = now;
-
-      try {
-        // Prepare the video frame for the model
-        const tensor = tf.tidy(() =>
-          tf.browser.fromPixels(video)
-            .resizeBilinear([112, 112])
-            .expandDims(0)
-            .toFloat()
-            .div(127.5)
-            .sub(1)
-        );
-
-        // Yield to the browser before running inference so the first-run
-        // WebGL shader compilation doesn't freeze the UI thread.
-        await tf.nextFrame();
-
-        // Both LayersModel and GraphModel expose .predict(); cast via any to
-        // satisfy TypeScript when the model was loaded as a GraphModel.
-        const output = (rgbModel as any).predict(tensor) as tf.Tensor;
-        await tf.nextFrame();
-        const probs  = await output.data();
-        tensor.dispose();
-        output.dispose();
-
-        let maxProb = 0, maxIdx = 0;
-        for (let i = 0; i < probs.length; i++) {
-          if (probs[i] > maxProb) { maxProb = probs[i]; maxIdx = i; }
-        }
-
-        const rawEntry = rgbLabelMap[String(maxIdx)];
-        const label = typeof rawEntry === 'object'
-          ? (lang === 'ar' && (rawEntry as LabelEntry).arabic
-              ? (rawEntry as LabelEntry).arabic
-              : (rawEntry as LabelEntry).name)
-          : rawEntry as string;
-
-        if (++debugCountRef.current % 5 === 0)
-          console.debug(`[RGB Prediction] "${label}" ${(maxProb * 100).toFixed(1)}%`);
-
-        if (maxProb >= RGB_THRESHOLD && label)
-          setPrediction({ type: 'word', label, confidence: maxProb });
-        else if (Date.now() - lastCallTime.current > 2000)
-          setPrediction(null);
-      } catch (err) {
-        console.error('Camera detection error:', err);
-      }
-    }, 200);
-
-    return () => clearInterval(rgbInterval);
-  }, [modelConfig, modelLoaded, videoRef, lang]);
 
   // Send the landmark data from MediaPipe to the worker
-  const processResults = useCallback((res: Results) => {
-    if (res?.multiHandLandmarks && modelLoaded && modelConfigRef.current !== 'rgb') {
+  const processResults = useCallback((res: any) => {
+    if (res?.multiHandLandmarks && modelLoaded) {
       workerRef.current?.postMessage({
-        landmarks:  res.multiHandLandmarks,
-        handedness: res.multiHandedness,
+        multiHandLandmarks: res.multiHandLandmarks,
+        multiHandedness: res.multiHandedness,
+        leftHandLandmarks: res.leftHandLandmarks,
+        rightHandLandmarks: res.rightHandLandmarks,
+        poseLandmarks: res.poseLandmarks,
       });
     }
   }, [modelLoaded]);
