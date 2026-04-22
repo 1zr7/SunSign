@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
-import * as tf from '@tensorflow/tfjs';
+import type * as TF from '@tensorflow/tfjs';
 import type { Results } from '@mediapipe/hands';
 
 // The three ways to detect signs based on the selected mode:
@@ -47,10 +47,8 @@ const MODEL_PATHS: Record<ModelConfig, ModelPaths> = {
   },
 };
 
-// RGB model (MobileNetV2) may be exported as a TFJS graph model rather than a
-// layers model because the converter handles complex functional architectures
-// more reliably in graph format.  Both types share a .predict() method.
-type AnyModel = tf.LayersModel | tf.GraphModel;
+// TF model types — resolved lazily at runtime, not imported at module load.
+type AnyModel = TF.LayersModel | TF.GraphModel;
 
 interface ModelState {
   cnnModel:             AnyModel | null;
@@ -74,6 +72,8 @@ export function useGestureModel(
   const workerRef      = useRef<Worker | undefined>(undefined);
   const lastCallTime   = useRef<number>(0);
   const modelConfigRef = useRef<ModelConfig>(modelConfig);
+  // Holds the lazily-loaded TF module so the worker message handler can use it
+  const tfRef          = useRef<typeof import('@tensorflow/tfjs') | null>(null);
   const modelStateRef  = useRef<ModelState>({
     cnnModel: null, cnnLabelMap: null,
     lstmModel: null, lstmLabelMap: null,
@@ -94,6 +94,12 @@ export function useGestureModel(
 
     const loadModels = async () => {
       try {
+        // ── Dynamic import: TensorFlow.js is 3.2 MB — we fetch it lazily ────────────
+        // This means TF only downloads AFTER the loading screen is visible,
+        // so it never blocks the First Contentful Paint.
+        const tf = await import('@tensorflow/tfjs');
+        tfRef.current = tf; // Share the module with the worker message handler
+
         let staticModel: AnyModel | null = null;
         let staticLabelMap: Record<string, LabelEntry | string> | null = null;
 
@@ -112,7 +118,7 @@ export function useGestureModel(
           staticLabelMap = await res.json();
         }
 
-        let dynamicModel: tf.LayersModel | null = null;
+        let dynamicModel: TF.LayersModel | null = null;
         let dynamicLabelMap: Record<string, LabelEntry | string> | null = null;
         let dynamicInputFeatures = 63;
         let dynamicInputTimeSteps: number | null = null;
@@ -248,8 +254,9 @@ export function useGestureModel(
           }
 
           const T = normSeq.length;
+          const tf = tfRef.current!;
           const inputTensor  = tf.tensor3d([normSeq, mirrorSeq], [2, T, dynamicInputFeatures]);
-          const outputTensor = lstmModel.predict(inputTensor) as tf.Tensor;
+          const outputTensor = lstmModel.predict(inputTensor) as TF.Tensor;
           await tf.nextFrame();
           const probs = await outputTensor.data();
           inputTensor.dispose();
@@ -289,9 +296,10 @@ export function useGestureModel(
           if (normRows.length > 0 || mirrorRows.length > 0) {
             // Predict on both normal and mirrored landmarks at once
             const allRows    = [...normRows, ...mirrorRows];
-            const inputTensor  = tf.tensor2d(allRows);
-            const outputTensor = cnnModel.predict(inputTensor) as tf.Tensor;
-            await tf.nextFrame();
+            const tf2 = tfRef.current!;
+            const inputTensor  = tf2.tensor2d(allRows);
+            const outputTensor = cnnModel.predict(inputTensor) as TF.Tensor;
+            await tf2.nextFrame();
             const probs = await outputTensor.data();
             inputTensor.dispose();
             outputTensor.dispose();

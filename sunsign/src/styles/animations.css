@@ -1,3 +1,17 @@
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Replaces framer-motion motion.div fade-in in App.tsx — zero JS cost */
+@keyframes app-fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.animate-app-fadein {
+  animation: app-fadein 1s ease-out forwards;
+}
+
 @keyframes rotate-slow {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }

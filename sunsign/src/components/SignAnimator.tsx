@@ -13,7 +13,15 @@ import { useGlossNLP, loadGlossConfig, GLOSS_CONFIG_EVENT } from '../hooks/useGl
  * and tells the avatar to play them in order.
  */
 
-export default function SignAnimator() {
+export default function SignAnimator({ 
+  forceInputText,
+  onInputProcessed,
+  isAutoMode
+}: { 
+  forceInputText?: string;
+  onInputProcessed?: (text: string) => void;
+  isAutoMode?: boolean;
+}) {
   const [tokens, setTokens]             = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [speed, setSpeed]               = useState(1);
@@ -45,9 +53,13 @@ export default function SignAnimator() {
   const handleSignComplete = useCallback(() => {
     setCurrentIndex(prev => {
       if (prev >= 0 && prev < tokens.length - 1) return prev + 1;
+      // When finished, clear the caption after a short delay
+      if (onInputProcessed) {
+        setTimeout(() => onInputProcessed(''), 1000);
+      }
       return -1; // Stop if no more signs are left
     });
-  }, [tokens.length]);
+  }, [tokens.length, onInputProcessed]);
 
   // Safety Timer: If the 3D model gets glitchy and doesn't tell us 
   // it's finished, we manually skip to the next sign after 4 seconds.
@@ -59,15 +71,25 @@ export default function SignAnimator() {
     return () => { if (safetyRef.current) clearTimeout(safetyRef.current); };
   }, [currentIndex, speed]);
 
-  const handleInputSubmit = async (text: string) => {
+  const handleInputSubmit = useCallback(async (text: string) => {
+    // Notify parent so PiP captions can display it
+    if (onInputProcessed) onInputProcessed(text);
+
     // Turn the sentence into a list of signs (like "أنا" "أحب" "أنت")
     const result = await glossify(text);
     setTokens(result);
-  };
+  }, [glossify, onInputProcessed]);
+
+  useEffect(() => {
+    if (forceInputText) {
+      handleInputSubmit(forceInputText);
+    }
+  }, [forceInputText, handleInputSubmit]);
 
   const handleStop = () => {
     setTokens([]);
     setCurrentIndex(-1);
+    if (onInputProcessed) onInputProcessed('');
   };
 
   const activeSign = isPlaying ? tokens[currentIndex] : null;
@@ -147,7 +169,7 @@ export default function SignAnimator() {
                           // Special styling for words that are being spelled out letter-by-letter
                           return (
                             <span key={gi} className="font-arabic text-xl transition-all duration-300 whitespace-nowrap inline-block">
-                              <span className="text-[10px] text-sun-warm/40 font-ui align-middle mr-1">Spell-</span>
+                              <span className="text-[10px] text-sun-warm/40 font-ui align-middle mr-1">ت.أ-</span>
                               {g.items.map((it, ci) => (
                                 <span
                                   key={ci}
@@ -228,7 +250,7 @@ export default function SignAnimator() {
         animate={{ y: 0, opacity: 1 }}
         className="w-full z-20 -mt-2"
       >
-        <TextInput onSubmit={handleInputSubmit} disabled={isPlaying || isGlossing} />
+        <TextInput onSubmit={handleInputSubmit} disabled={isPlaying || isGlossing} isAutoMode={isAutoMode} />
       </motion.div>
     </div>
   );

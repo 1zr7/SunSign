@@ -5,6 +5,32 @@
     <link rel="icon" type="image/svg+xml" href="/sunsign-logo.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SunSign | نور يتكلم بكل يد</title>
+    <meta name="description" content="SunSign — Real-time Arabic sign language recognition and translation powered by AI." />
+
+    <!--
+      Google Fonts — non-blocking load strategy:
+      1. preconnect hints let the browser open the TCP/TLS connections early.
+      2. media="print" means the stylesheet is fetched at low priority (non-blocking).
+      3. The onload handler switches it to media="all" once it arrives.
+      4. font-display=optional means the browser never waits for fonts to paint text.
+         If fonts aren't ready on first paint, the system fallback is used.
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=JetBrains+Mono:wght@300;400;500;600&display=optional"
+      media="print"
+      onload="this.media='all'"
+    />
+    <!-- Fallback for JS-disabled browsers -->
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=JetBrains+Mono:wght@300;400;500;600&display=optional"
+      />
+    </noscript>
+
     <!-- MediaPipe components — async so they never block initial React render -->
     <script async src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script async src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>

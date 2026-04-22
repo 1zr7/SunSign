@@ -17,14 +17,15 @@ import { SUPPORTED_LANGUAGES } from '../utils/languages';
 interface TextInputProps {
   onSubmit: (text: string) => void;
   disabled?: boolean;
+  isAutoMode?: boolean;
 }
 
-export default function TextInput({ onSubmit, disabled }: TextInputProps) {
+export default function TextInput({ onSubmit, disabled, isAutoMode }: TextInputProps) {
   const [text, setText] = useState('');
   const [langCode, setLangCode] = useState('ar');
   const [isTranslating, setIsTranslating] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const { isListening, transcript, startListening, clearTranscript } = useSpeechRecognition();
+  const { isListening, transcript, startListening, stopListening, clearTranscript } = useSpeechRecognition();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
@@ -40,18 +41,23 @@ export default function TextInput({ onSubmit, disabled }: TextInputProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isDropdownOpen]);
 
-  // If you use the microphone, add the heard words to the text box
+  // If you use the microphone, add the heard words to the text box (only in manual mode)
   useEffect(() => {
-    if (transcript) {
+    if (transcript && !isAutoMode) {
       setText(prev => prev ? `${prev} ${transcript}` : transcript);
       clearTranscript();
     }
-  }, [transcript, clearTranscript]);
+  }, [transcript, clearTranscript, isAutoMode]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const currentText = text.trim();
+  const handleSubmit = async (e?: React.FormEvent, overrideText?: string) => {
+    if (e) e.preventDefault();
+    const currentText = (overrideText ?? text).trim();
     if (!currentText || disabled || isTranslating) return;
+
+    // Only clear the text box if we were using it (not overriding)
+    if (!overrideText) {
+      setText('');
+    }
 
     // If the language isn't Arabic, ask Google Translate for help first
     if (langCode !== 'ar') {
@@ -62,10 +68,33 @@ export default function TextInput({ onSubmit, disabled }: TextInputProps) {
     } else {
       onSubmit(currentText);
     }
-    setText(''); // Clear the box after sending
   };
-
   const currentLang = SUPPORTED_LANGUAGES.find(l => l.code === langCode) || SUPPORTED_LANGUAGES[0];
+
+  // Auto Mode: Start continuous listening when activated
+  useEffect(() => {
+    if (isAutoMode) {
+      startListening(currentLang.ttsCode, true, (finalText) => {
+        if (finalText.trim()) {
+          handleSubmit(undefined, finalText);
+        }
+      });
+    } else {
+      stopListening();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAutoMode, currentLang.ttsCode]);
+
+  // Auto Mode: Automatically submit TYPED text after 1.5 seconds of inactivity
+  useEffect(() => {
+    if (!isAutoMode || disabled || isTranslating || !text.trim()) return;
+
+    const timer = setTimeout(() => {
+      handleSubmit();
+    }, 1500);
+    
+    return () => clearTimeout(timer);
+  }, [text, isAutoMode, disabled, isTranslating]);
 
   return (
     <form onSubmit={handleSubmit} className="relative w-full sun-glass p-1">

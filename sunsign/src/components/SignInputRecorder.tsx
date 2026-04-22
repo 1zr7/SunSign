@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Volume2, Delete, Trash2, Pencil, ChevronDown, Check } from 'lucide-react';
+import { Volume2, Delete, Trash2, Pencil, ChevronDown, Check, PictureInPicture2, Zap, Brain } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { translateText } from '../hooks/useTranslationApi';
 import { SUPPORTED_LANGUAGES } from '../utils/languages';
@@ -24,6 +24,12 @@ interface SignInputRecorderProps {
   onClear: () => void;
   onSpeak: (text: string, lang?: string) => void;
   onSentenceChange: (text: string) => void;
+  isAutoMode?: boolean;
+  setIsAutoMode?: (val: boolean) => void;
+  isPiPActive?: boolean;
+  togglePiP?: () => void;
+  modelConfig?: string;
+  onModelToggle?: () => void;
 }
 
 export default function SignInputRecorder({
@@ -35,6 +41,12 @@ export default function SignInputRecorder({
   onClear,
   onSpeak,
   onSentenceChange,
+  isAutoMode,
+  setIsAutoMode,
+  isPiPActive,
+  togglePiP,
+  modelConfig,
+  onModelToggle,
 }: SignInputRecorderProps) {
   const { t } = useTranslation();
   const [outLangCode, setOutLangCode] = useState('ar');
@@ -87,6 +99,18 @@ export default function SignInputRecorder({
       onSpeak(fullText, 'ar-SA');
     }
   };
+
+  // Auto Mode: Automatically speak and clear after 2 seconds of inactivity
+  useEffect(() => {
+    if (!isAutoMode || !fullText) return;
+    
+    const timer = setTimeout(() => {
+      handleSpeak();
+      setTimeout(onClear, 500); // Give it a tiny delay so the voice starts before clearing
+    }, 2000);
+    
+    return () => clearTimeout(timer);
+  }, [fullText, isAutoMode, outLangCode, translatedText]);
 
   return (
     <div className="w-full flex flex-col gap-4">
@@ -154,9 +178,35 @@ export default function SignInputRecorder({
                   </div>
                 </motion.div>
               )}
-            </AnimatePresence>
+              </AnimatePresence>
           </div>
           
+          <button
+            onClick={onModelToggle}
+            className={`w-11 h-11 flex items-center justify-center rounded-full transition-all duration-300 z-20 relative font-ui font-bold text-[10px] tracking-wider ${modelConfig === 'dual_lstm' ? 'bg-sun-core text-sun-void shadow-[0_0_15px_rgba(255,184,0,0.5)]' : 'sun-glass text-text-secondary hover:bg-sun-core/20 hover:text-text-primary'}`}
+            title={`Switch Model (Current: ${modelConfig === 'static' ? 'Fingerspelling' : 'LSTM Words'})`}
+          >
+            {modelConfig === 'static' ? 'FS' : 'LSTM'}
+          </button>
+
+          <button
+            onClick={() => setIsAutoMode && setIsAutoMode(!isAutoMode)}
+            className={`p-3 rounded-full transition-all duration-300 z-20 relative ${isAutoMode ? 'bg-sun-core text-sun-void shadow-[0_0_15px_rgba(255,184,0,0.5)]' : 'sun-glass text-text-secondary hover:bg-sun-core/20 hover:text-text-primary'}`}
+            title="Auto-Send & Speak Mode"
+          >
+            <Zap size={20} />
+          </button>
+
+          <button
+            onClick={togglePiP}
+            className={`p-3 rounded-full transition-all duration-300 z-20 relative ${isPiPActive ? 'bg-sun-core text-sun-void shadow-[0_0_15px_rgba(255,184,0,0.5)]' : 'sun-glass text-text-secondary hover:bg-sun-core/20 hover:text-text-primary'}`}
+            title="Picture-in-Picture Mode"
+          >
+            <PictureInPicture2 size={20} />
+          </button>
+          
+          <div className="w-px h-6 bg-sun-border mx-1 z-20" />
+
           <button 
             onClick={handleSpeak}
             disabled={!fullText}

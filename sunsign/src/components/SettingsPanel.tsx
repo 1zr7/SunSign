@@ -229,19 +229,6 @@ export default function SettingsPanel({
                             {isActive && <Check size={10} className="text-sun-void" strokeWidth={3} />}
                           </div>
                         </div>
-
-                        <p className="font-ui text-[11px] text-text-secondary mt-2 leading-snug">
-                          {m.description}
-                        </p>
-
-                        <div className="flex gap-2 mt-2.5 flex-wrap">
-                          <span className="font-ui text-[10px] text-sun-core/80 bg-sun-core/10 px-1.5 py-0.5 rounded">
-                            {m.acc} {m.accLabel}
-                          </span>
-                          <span className="font-ui text-[10px] text-text-secondary/70 bg-sun-void/60 border border-sun-border px-1.5 py-0.5 rounded">
-                            {m.vocab}
-                          </span>
-                        </div>
                       </button>
                     );
                   })}
